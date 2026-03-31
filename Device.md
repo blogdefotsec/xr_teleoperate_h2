@@ -189,9 +189,9 @@
 
 |           Item           | Quantity |            Remarks             |                        Download Link                         |
 | :----------------------: | :------: | :----------------------------: | :----------------------------------------------------------: |
-|     D405 Wrist Ring      |    2     |  To be used with wrist bracket   | [📥 STEP](https://github.com/unitreerobotics/xr_teleoperate/blob/7cd188c1657ad4df97cfcd44e9f35bac937f7f2b/hardware/wrist_ring_mount.STEP) |
-| Left Wrist Camera Bracket  |    1     | For mounting left D405 camera  | [📥 STEP](https://github.com/unitreerobotics/xr_teleoperate/blob/7cd188c1657ad4df97cfcd44e9f35bac937f7f2b/hardware/left_wrist_D405_camera_mount.STEP) |
-| Right Wrist Camera Bracket |    1     | For mounting right D405 camera | [📥 STEP](https://github.com/unitreerobotics/xr_teleoperate/blob/7cd188c1657ad4df97cfcd44e9f35bac937f7f2b/hardware/right_wrist_D405_camera_mount.STEP) |
+|     D405 Wrist Ring      |    2     |  To be used with wrist bracket   | [📥 STEP](https://github.com/unitreerobotics/xr_teleoperate/blob/7cd188c1657ad4df97cfcd44e9f35bac937f7f2b/hardware/left_wrist_D405_camera_mount.STEP) |
+| Left Wrist Camera Bracket  |    1     | For mounting left D405 camera  | [📥 STEP](https://github.com/unitreerobotics/xr_teleoperate/blob/7cd188c1657ad4df97cfcd44e9f35bac937f7f2b/hardware/right_wrist_D405_camera_mount.STEP) |
+| Right Wrist Camera Bracket |    1     | For mounting right D405 camera | [📥 STEP](https://github.com/unitreerobotics/xr_teleoperate/blob/7cd188c1657ad4df97cfcd44e9f35bac937f7f2b/hardware/wrist_ring_mount.STEP) |
 
 ### 5.2.4 G1 Wrist Monocular Camera
 

@@ -191,9 +191,9 @@
 
 |       项目        | 数量 |          备注          |                           下载链接                           |
 | :---------------: | :--: | :--------------------: | :----------------------------------------------------------: |
-| D405 相机腕圈支架 |  2   | 与腕部相机支架搭配使用 | [📥 STEP](https://github.com/unitreerobotics/xr_teleoperate/blob/7cd188c1657ad4df97cfcd44e9f35bac937f7f2b/hardware/wrist_ring_mount.STEP) |
-|   左腕相机支架    |  1   |  用于装配左腕D405相机  | [📥 STEP](https://github.com/unitreerobotics/xr_teleoperate/blob/7cd188c1657ad4df97cfcd44e9f35bac937f7f2b/hardware/left_wrist_D405_camera_mount.STEP) |
-|   右腕相机支架    |  1   |  用于装配右腕D405相机  | [📥 STEP](https://github.com/unitreerobotics/xr_teleoperate/blob/7cd188c1657ad4df97cfcd44e9f35bac937f7f2b/hardware/right_wrist_D405_camera_mount.STEP) |
+| D405 相机腕圈支架 |  2   | 与腕部相机支架搭配使用 | [📥 STEP](https://github.com/unitreerobotics/xr_teleoperate/blob/7cd188c1657ad4df97cfcd44e9f35bac937f7f2b/hardware/left_wrist_D405_camera_mount.STEP) |
+|   左腕相机支架    |  1   |  用于装配左腕D405相机  | [📥 STEP](https://github.com/unitreerobotics/xr_teleoperate/blob/7cd188c1657ad4df97cfcd44e9f35bac937f7f2b/hardware/right_wrist_D405_camera_mount.STEP) |
+|   右腕相机支架    |  1   |  用于装配右腕D405相机  | [📥 STEP](https://github.com/unitreerobotics/xr_teleoperate/blob/7cd188c1657ad4df97cfcd44e9f35bac937f7f2b/hardware/wrist_ring_mount.STEP) |
 
 ### 5.2.4 G1 腕部单目相机
 
