@@ -14,8 +14,8 @@ sys.path.append(parent_dir)
 
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize # dds 
 from televuer import TeleVuerWrapper
-from teleop.robot_control.robot_arm import G1_29_ArmController, G1_23_ArmController, H1_2_ArmController, H1_ArmController
-from teleop.robot_control.robot_arm_ik import G1_29_ArmIK, G1_23_ArmIK, H1_2_ArmIK, H1_ArmIK
+from teleop.robot_control.robot_arm import G1_29_ArmController, G1_23_ArmController, H1_2_ArmController, H1_ArmController, H2_ArmController
+from teleop.robot_control.robot_arm_ik import G1_29_ArmIK, G1_23_ArmIK, H1_2_ArmIK, H1_ArmIK, H2_ArmIK
 from teleimager.image_client import ImageClient
 from teleop.utils.episode_writer import EpisodeWriter
 from teleop.utils.ipc import IPC_Server
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     parser.add_argument('--frequency', type = float, default = 30.0, help = 'control and record \'s frequency')
     parser.add_argument('--input-mode', type=str, choices=['hand', 'controller'], default='hand', help='Select XR device input tracking source')
     parser.add_argument('--display-mode', type=str, choices=['immersive', 'ego', 'pass-through'], default='immersive', help='Select XR device display mode')
-    parser.add_argument('--arm', type=str, choices=['G1_29', 'G1_23', 'H1_2', 'H1'], default='G1_29', help='Select arm controller')
+    parser.add_argument('--arm', type=str, choices=['G1_29', 'G1_23', 'H1_2', 'H1', 'H2'], default='G1_29', help='Select arm controller')
     parser.add_argument('--ee', type=str, choices=['dex1', 'dex3', 'inspire_ftp', 'inspire_dfx', 'brainco'], help='Select end effector controller')
     parser.add_argument('--img-server-ip', type=str, default='192.168.123.164', help='IP address of image server, used by teleimager and televuer')
     parser.add_argument('--network-interface', type=str, default=None, help='Network interface for dds communication, e.g., eth0, wlan0. If None, use default interface.')
@@ -116,10 +116,20 @@ if __name__ == '__main__':
             listen_keyboard_thread.start()
 
         # image client
-        img_client = ImageClient(host=args.img_server_ip, request_bgr=True)
-        camera_config = img_client.get_cam_config()
-        logger_mp.debug(f"Camera config: {camera_config}")
-        xr_need_local_img = not (args.display_mode == 'pass-through' or camera_config['head_camera']['enable_webrtc'])
+        if args.arm == "H2":
+            # H2 does not use cameras
+            img_client = None
+            camera_config = {
+                'head_camera': {'enable_zmq': False, 'enable_webrtc': False, 'binocular': False, 'image_shape': (480, 640), 'webrtc_port': 8889},
+                'left_wrist_camera': {'enable_zmq': False},
+                'right_wrist_camera': {'enable_zmq': False}
+            }
+            xr_need_local_img = False
+        else:
+            img_client = ImageClient(host=args.img_server_ip, request_bgr=True)
+            camera_config = img_client.get_cam_config()
+            logger_mp.debug(f"Camera config: {camera_config}")
+            xr_need_local_img = not (args.display_mode == 'pass-through' or camera_config['head_camera']['enable_webrtc'])
 
         # televuer_wrapper: obtain hand pose data from the XR device and transmit the robot's head camera image to the XR device.
         tv_wrapper = TeleVuerWrapper(use_hand_tracking=args.input_mode == "hand", 
@@ -128,7 +138,7 @@ if __name__ == '__main__':
                                      # maybe should decrease fps for better performance?
                                      # https://github.com/unitreerobotics/xr_teleoperate/issues/172
                                      # display_fps=camera_config['head_camera']['fps'] ? args.frequency? 30.0?
-                                     display_mode=args.display_mode,
+                                     display_mode='pass-through' if args.arm == "H2" else args.display_mode,
                                      zmq=camera_config['head_camera']['enable_zmq'],
                                      webrtc=camera_config['head_camera']['enable_webrtc'],
                                      webrtc_url=f"https://{args.img_server_ip}:{camera_config['head_camera']['webrtc_port']}/offer",
@@ -156,6 +166,9 @@ if __name__ == '__main__':
         elif args.arm == "H1":
             arm_ik = H1_ArmIK()
             arm_ctrl = H1_ArmController(simulation_mode=args.sim)
+        elif args.arm == "H2":
+            arm_ik = H2_ArmIK()
+            arm_ctrl = H2_ArmController(simulation_mode=args.sim)
 
         # end-effector
         if args.ee == "dex3":
@@ -250,25 +263,30 @@ if __name__ == '__main__':
         READY = True                  # now ready to (1) enter START state
         while not START and not STOP: # wait for start or stop signal.
             time.sleep(0.033)
-            if camera_config['head_camera']['enable_zmq'] and xr_need_local_img:
+            if args.arm != "H2" and camera_config['head_camera']['enable_zmq'] and xr_need_local_img:
                 head_img = img_client.get_head_frame()
                 tv_wrapper.render_to_xr(head_img)
 
         logger_mp.info("---------------------🚀start Tracking🚀-------------------------")
         arm_ctrl.speed_gradual_max()
+        
+        head_img = None
+        left_wrist_img = None
+        right_wrist_img = None
+        
         # main loop. robot start to follow VR user's motion
         while not STOP:
             start_time = time.time()
             # get image
-            if camera_config['head_camera']['enable_zmq']:
+            if args.arm != "H2" and camera_config['head_camera']['enable_zmq']:
                 if args.record or xr_need_local_img:
                     head_img = img_client.get_head_frame()
                 if xr_need_local_img:
                     tv_wrapper.render_to_xr(head_img)
-            if camera_config['left_wrist_camera']['enable_zmq']:
+            if args.arm != "H2" and camera_config['left_wrist_camera']['enable_zmq']:
                 if args.record:
                     left_wrist_img = img_client.get_left_wrist_frame()
-            if camera_config['right_wrist_camera']['enable_zmq']:
+            if args.arm != "H2" and camera_config['right_wrist_camera']['enable_zmq']:
                 if args.record:
                     right_wrist_img = img_client.get_right_wrist_frame()
 
@@ -385,12 +403,13 @@ if __name__ == '__main__':
                 if RECORD_RUNNING:
                     colors = {}
                     depths = {}
-                    if camera_config['head_camera']['binocular']:
-                        if head_img is not None:
-                            colors[f"color_{0}"] = head_img.bgr[:, :camera_config['head_camera']['image_shape'][1]//2]
-                            colors[f"color_{1}"] = head_img.bgr[:, camera_config['head_camera']['image_shape'][1]//2:]
-                        else:
-                            logger_mp.warning("Head image is None!")
+                    if args.arm != "H2" and camera_config['head_camera']['binocular']:
+                        if camera_config['head_camera']['enable_zmq']:
+                            if head_img is not None:
+                                colors[f"color_{0}"] = head_img.bgr[:, :camera_config['head_camera']['image_shape'][1]//2]
+                                colors[f"color_{1}"] = head_img.bgr[:, camera_config['head_camera']['image_shape'][1]//2:]
+                            else:
+                                logger_mp.warning("Head image is None!")
                         if camera_config['left_wrist_camera']['enable_zmq']:
                             if left_wrist_img is not None:
                                 colors[f"color_{2}"] = left_wrist_img.bgr
@@ -401,11 +420,12 @@ if __name__ == '__main__':
                                 colors[f"color_{3}"] = right_wrist_img.bgr
                             else:
                                 logger_mp.warning("Right wrist image is None!")
-                    else:
-                        if head_img is not None:
-                            colors[f"color_{0}"] = head_img
-                        else:
-                            logger_mp.warning("Head image is None!")
+                    elif args.arm != "H2":
+                        if camera_config['head_camera']['enable_zmq']:
+                            if head_img is not None:
+                                colors[f"color_{0}"] = head_img
+                            else:
+                                logger_mp.warning("Head image is None!")
                         if camera_config['left_wrist_camera']['enable_zmq']:
                             if left_wrist_img is not None:
                                 colors[f"color_{1}"] = left_wrist_img.bgr
@@ -499,7 +519,8 @@ if __name__ == '__main__':
             logger_mp.error(f"Failed to stop keyboard listener or ipc server: {e}")
         
         try:
-            img_client.close()
+            if img_client is not None:
+                img_client.close()
         except Exception as e:
             logger_mp.error(f"Failed to close image client: {e}")
 
