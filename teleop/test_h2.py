@@ -22,7 +22,7 @@ def main():
     parser.add_argument('--sim', action='store_true', help="Use DDS channel 1 for simulation")
     args = parser.parse_args()
 
-    # We enforce Unit_Test=False so it looks for '../h2_description/H2.urdf' which is correct 
+    # We enforce Unit_Test=False so it looks for '../assets/h2_description/H2.urdf' which is correct 
     # since we changed cwd to 'teleop/'
     is_unit_test = False 
 

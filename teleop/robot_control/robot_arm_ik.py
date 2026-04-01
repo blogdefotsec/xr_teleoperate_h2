@@ -1210,11 +1210,11 @@ class H2_ArmIK:
         self.cache_path = "h2_model_cache.pkl"
 
         if not self.Unit_Test:
-            self.urdf_path = '../h2_description/H2.urdf'
-            self.model_dir = '../h2_description/'
+            self.urdf_path = '../assets/h2_description/H2.urdf'
+            self.model_dir = '../assets/h2_description/'
         else:
-            self.urdf_path = '../../h2_description/H2.urdf'
-            self.model_dir = '../../h2_description/'
+            self.urdf_path = '../../assets/h2_description/H2.urdf'
+            self.model_dir = '../../assets/h2_description/'
 
         # Try loading cache first
         if os.path.exists(self.cache_path) and (not self.Visualization):
